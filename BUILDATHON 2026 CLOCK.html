@@ -106,6 +106,29 @@
     padding-bottom:14%;
     text-align:center;
   }
+  
+  .sound-prompt {
+    position: absolute;
+    bottom: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    animation: pulse 2s infinite;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+    z-index: 10;
+  }
+  .sound-prompt.hidden {
+    opacity: 0;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+  }
 
   h1.title{
     font-family:'Montserrat', sans-serif;
@@ -229,6 +252,8 @@
       <div class="unit"><div class="digits"><div class="num-wrap" id="ss_t"></div><div class="num-wrap" id="ss_u"></div></div><span class="lab">Seconds</span></div>
     </div>
   </div>
+  
+  <div class="sound-prompt" id="soundPrompt">Tap anywhere for sound</div>
 </div>
 
 <script>
@@ -306,6 +331,8 @@
     if(bgAudio.paused){
       bgAudio.play().then(() => {
         isPlaying = true;
+        const prompt = document.getElementById('soundPrompt');
+        if(prompt) prompt.classList.add('hidden');
       }).catch(e => console.error(e));
     }
   }
