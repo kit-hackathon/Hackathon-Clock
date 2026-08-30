@@ -249,17 +249,9 @@
 
 
   let soundOn = true;
-  const AudioContext = window.AudioContext || window.webkitAudioContext;
-  const audioCtx = new AudioContext();
-  let audioBuffer = null;
+  const bgAudio = new Audio('Sound.mp3');
+  bgAudio.loop = true;
   let isPlaying = false;
-
-  fetch('Sound.mp3')
-    .then(res => res.arrayBuffer())
-    .then(data => audioCtx.decodeAudioData(data))
-    .then(buffer => {
-      audioBuffer = buffer;
-    }).catch(e => console.error(e));
 
   function fmt(n){ return String(n).padStart(5,'0'); }
 
@@ -310,16 +302,12 @@
 
 
   function playAudio(){
-    if(!soundOn || !audioBuffer || isPlaying) return;
-    if(audioCtx.state === 'suspended') audioCtx.resume();
-    const source = audioCtx.createBufferSource();
-    source.buffer = audioBuffer;
-    source.loop = true;
-    source.loopStart = 0.05;
-    source.loopEnd = Math.max(0.1, audioBuffer.duration - 0.05);
-    source.connect(audioCtx.destination);
-    source.start(0, 0.05);
-    isPlaying = true;
+    if(!soundOn) return;
+    if(bgAudio.paused){
+      bgAudio.play().then(() => {
+        isPlaying = true;
+      }).catch(e => console.error(e));
+    }
   }
 
   function render(){
