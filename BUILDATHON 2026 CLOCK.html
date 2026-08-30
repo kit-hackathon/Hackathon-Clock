@@ -334,14 +334,14 @@
     updateNum('mm_u', mStr[1]);
     updateNum('ss_t', sStr[0]);
     updateNum('ss_u', sStr[1]);
-    playAudio();
     if(b.done) clearInterval(timerId);
   }
 
   document.addEventListener('click', ()=>{
-    if(soundOn) {
-      playAudio();
-    }
+    if(soundOn) playAudio();
+  }, { once: true });
+  document.addEventListener('touchstart', ()=>{
+    if(soundOn) playAudio();
   }, { once: true });
 
   const bg1 = document.querySelector('.bg1');
