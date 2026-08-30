@@ -254,7 +254,7 @@
   let audioBuffer = null;
   let isPlaying = false;
 
-  fetch('sound.mp3')
+  fetch('Sound.mp3')
     .then(res => res.arrayBuffer())
     .then(data => audioCtx.decodeAudioData(data))
     .then(buffer => {
