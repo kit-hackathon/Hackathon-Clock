@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Buildathon 2026</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&display=swap');
+
+  :root{
+    --void:#050303;
+    --mist:#ffffff;
+    --dim:rgba(255,255,255,0.7);
+    --ember:#ff2d2d;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  html,body{
+    width:100%; height:100%;
+    background:var(--void);
+    overflow:hidden;
+    font-family:'Montserrat', sans-serif;
+  }
+
+  .stage{
+    position:relative;
+    width:100%;
+    height:100vh;
+    min-height:600px;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .bg{
+    position:absolute;
+    inset:0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter:saturate(1.15) contrast(1.1) brightness(1.1);
+    transition: opacity 0.5s ease-in-out;
+  }
+  .bg.hidden {
+    opacity: 0;
+  }
+
+  .lightpulse{
+    position:absolute;
+    inset:0;
+    background:radial-gradient(ellipse 340px 900px at 51% -10%, rgba(255,80,60,0.35), rgba(255,80,60,0) 60%);
+    mix-blend-mode:screen;
+    animation:flicker 3.4s infinite ease-in-out;
+    pointer-events:none;
+  }
+  @keyframes flicker{
+    0%,100%{opacity:.55;}
+    8%{opacity:.3;}
+    12%{opacity:.7;}
+    20%{opacity:.45;}
+    45%{opacity:.65;}
+    62%{opacity:.35;}
+    70%{opacity:.6;}
+    88%{opacity:.4;}
+  }
+
+  .vignette{
+    position:absolute; inset:0;
+    background:
+      radial-gradient(ellipse at center, rgba(0,0,0,0) 30%, rgba(0,0,0,0.55) 78%, rgba(0,0,0,0.85) 100%),
+      linear-gradient(180deg, rgba(2,0,0,0.55) 0%, rgba(2,0,0,0.15) 22%, rgba(2,0,0,0.25) 60%, rgba(2,0,0,0.9) 100%);
+    pointer-events:none;
+  }
+
+  canvas#dust{
+    position:absolute; inset:0;
+    pointer-events:none;
+  }
+
+  .grain{
+    position:absolute; inset:0;
+    pointer-events:none;
+    opacity:.04;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation:grainshift 1s steps(4) infinite;
+  }
+  @keyframes grainshift{
+    0%{transform:translate(0,0)}
+    25%{transform:translate(-2%,1%)}
+    50%{transform:translate(1%,-2%)}
+    75%{transform:translate(-1%,2%)}
+    100%{transform:translate(0,0)}
+  }
+
+  .content{
+    position:relative;
+    z-index:5;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-end;
+    height:100%;
+    padding-bottom:14%;
+    text-align:center;
+  }
+
+  h1.title{
+    font-family:'Montserrat', sans-serif;
+    font-weight:800;
+    font-size:clamp(16px, 2vw, 24px);
+    letter-spacing:.15em;
+    color:var(--mist);
+    text-transform:uppercase;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    margin-bottom:5px;
+  }
+
+  .clock{
+    display:flex;
+    align-items:baseline;
+    gap:0;
+  }
+
+  .unit{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:0 10px;
+  }
+
+  .unit .digits{
+    font-family:'Montserrat', sans-serif;
+    font-weight:700;
+    font-size:clamp(40px, 6vw, 90px);
+    color:var(--mist);
+    text-shadow:0 2px 4px rgba(0,0,0,0.5);
+    line-height:1;
+    font-variant-numeric:tabular-nums;
+    display: flex;
+    justify-content: center;
+  }
+  .unit .digits .num{
+    transition: none;
+  }
+
+  .unit .lab{
+    margin-top:12px;
+    font-family:'Montserrat', sans-serif;
+    font-weight:700;
+    font-size:clamp(10px, 1.2vw, 14px);
+    letter-spacing:.2em;
+    color:var(--mist);
+    text-transform:uppercase;
+    opacity: 0.8;
+  }
+  
+  .colon{
+    font-family:'Montserrat', sans-serif;
+    font-weight:700;
+    font-size:clamp(40px, 6vw, 90px);
+    color:var(--mist);
+    text-shadow:0 2px 4px rgba(0,0,0,0.5);
+    line-height:1;
+    transform:translateY(-12px);
+  }
+  .num-wrap{
+    position:relative;
+    width: 0.68em;
+    height: 1em;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    clip-path: polygon(-50% 0%, 150% 0%, 150% 100%, -50% 100%);
+  }
+  .num-wrap .num.absolute{
+    position:absolute;
+    inset:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+  }
+  .slide-leave{
+    animation:slideOutDown 0.4s ease forwards;
+  }
+  .slide-enter{
+    animation:slideInUp 0.4s ease forwards;
+  }
+  @keyframes slideOutDown{
+    0%{ transform:translateY(0); opacity:1; }
+    100%{ transform:translateY(80%); opacity:0; }
+  }
+  @keyframes slideInUp{
+    0%{ transform:translateY(80%); opacity:0; }
+    100%{ transform:translateY(0); opacity:1; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .lightpulse, .grain{ animation:none !important; }
+  }
+
+  @media (max-width: 560px){
+    .unit{ padding:0 6px; }
+    .colon{ padding:0 2px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <video class="bg bg1" autoplay muted playsinline src="BG.mp4"></video>
+  <video class="bg bg2 hidden" autoplay muted playsinline src="BG.mp4"></video>
+  <div class="lightpulse"></div>
+  <div class="vignette"></div>
+  <canvas id="dust"></canvas>
+  <div class="grain"></div>
+
+
+  <div class="content">
+    <h1 class="title">Buildathon 2026</h1>
+
+    <div class="clock">
+
+      <div class="unit"><div class="digits"><div class="num-wrap" id="hh_t"></div><div class="num-wrap" id="hh_u"></div></div><span class="lab">Hours</span></div>
+      <div class="colon">:</div>
+      <div class="unit"><div class="digits"><div class="num-wrap" id="mm_t"></div><div class="num-wrap" id="mm_u"></div></div><span class="lab">Minutes</span></div>
+      <div class="colon">:</div>
+      <div class="unit"><div class="digits"><div class="num-wrap" id="ss_t"></div><div class="num-wrap" id="ss_u"></div></div><span class="lab">Seconds</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+
+  // ============================================================
+  //  SET YOUR COUNTDOWN TARGET HERE (edit this line only).
+  //  Format: 'YYYY-MM-DDTHH:MM:SS'
+  // ============================================================
+  const TARGET_DATE = new Date('2026-08-30T20:15:00');
+  // ============================================================
+
+  const moEl = document.getElementById('mo');
+  const ddEl = document.getElementById('dd');
+  const hhEl = document.getElementById('hh');
+  const mmEl = document.getElementById('mm');
+  const ssEl = document.getElementById('ss');
+
+
+  let soundOn = true;
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  const audioCtx = new AudioContext();
+  let audioBuffer = null;
+  let isPlaying = false;
+
+  fetch('sound 2.mp3')
+    .then(res => res.arrayBuffer())
+    .then(data => audioCtx.decodeAudioData(data))
+    .then(buffer => {
+      audioBuffer = buffer;
+    }).catch(e => console.error(e));
+
+  function fmt(n){ return String(n).padStart(5,'0'); }
+
+  // Calendar-aware breakdown: months, days, hours, minutes, seconds
+  function getBreakdown(now, target){
+    if(target <= now){
+      return {months:0, days:0, hours:0, minutes:0, seconds:0, done:true};
+    }
+    let months = (target.getFullYear() - now.getFullYear()) * 12 + (target.getMonth() - now.getMonth());
+    let cursor = new Date(now);
+    cursor.setMonth(cursor.getMonth() + months);
+    if(cursor > target){
+      months -= 1;
+      cursor = new Date(now);
+      cursor.setMonth(cursor.getMonth() + months);
+    }
+    let remainingMs = target - cursor;
+    const days = Math.floor(remainingMs / (1000*60*60*24));
+    remainingMs -= days * (1000*60*60*24);
+    const hours = Math.floor(remainingMs / (1000*60*60));
+    remainingMs -= hours * (1000*60*60);
+    const minutes = Math.floor(remainingMs / (1000*60));
+    remainingMs -= minutes * (1000*60);
+    const seconds = Math.floor(remainingMs / 1000);
+    return {months, days, hours, minutes, seconds, done:false};
+  }
+
+  function updateNum(id, value) {
+    const wrap = document.getElementById(id);
+    if (!wrap) return;
+    const currentSpan = wrap.querySelector('.num:not(.slide-leave)');
+    if (currentSpan && currentSpan.textContent === value) return;
+    const newSpan = document.createElement('span');
+    newSpan.className = 'num slide-enter absolute';
+    newSpan.textContent = value;
+    if (currentSpan) {
+      currentSpan.classList.remove('slide-enter');
+      currentSpan.classList.add('slide-leave');
+      setTimeout(() => {
+        if(currentSpan.parentNode === wrap) wrap.removeChild(currentSpan);
+      }, 400);
+    }
+    setTimeout(() => {
+      if(newSpan.parentNode === wrap) newSpan.classList.remove('slide-enter');
+    }, 400);
+    wrap.appendChild(newSpan);
+  }
+
+
+  function playAudio(){
+    if(!soundOn || !audioBuffer || isPlaying) return;
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    const source = audioCtx.createBufferSource();
+    source.buffer = audioBuffer;
+    source.loop = true;
+    source.loopStart = 0.05;
+    source.loopEnd = Math.max(0.1, audioBuffer.duration - 0.05);
+    source.connect(audioCtx.destination);
+    source.start(0, 0.05);
+    isPlaying = true;
+  }
+
+  function render(){
+    const b = getBreakdown(new Date(), TARGET_DATE);
+    const hStr = fmt(b.hours);
+    const mStr = fmt(b.minutes);
+    const sStr = fmt(b.seconds);
+
+    updateNum('hh_t', hStr[0]);
+    updateNum('hh_u', hStr[1]);
+    updateNum('mm_t', mStr[0]);
+    updateNum('mm_u', mStr[1]);
+    updateNum('ss_t', sStr[0]);
+    updateNum('ss_u', sStr[1]);
+    playAudio();
+    if(b.done) clearInterval(timerId);
+  }
+
+  document.addEventListener('click', ()=>{
+    if(soundOn) {
+      playAudio();
+    }
+  }, { once: true });
+
+  const bg1 = document.querySelector('.bg1');
+  const bg2 = document.querySelector('.bg2');
+  if (bg1 && bg2) {
+    let activeBg = bg1;
+    let inactiveBg = bg2;
+    // Allow metadata to load before pre-seeking
+    bg1.addEventListener('loadedmetadata', () => { bg1.currentTime = 1; });
+    bg2.addEventListener('loadedmetadata', () => { bg2.currentTime = 1; });
+    
+    let isSwapping = false;
+
+    function smoothCrossfadeLoop() {
+      if (activeBg.duration && (activeBg.duration - activeBg.currentTime) <= 0.5 && !isSwapping) {
+        isSwapping = true;
+        inactiveBg.play().catch(()=>{});
+        inactiveBg.classList.remove('hidden');
+        activeBg.classList.add('hidden');
+        
+        let previousBg = activeBg;
+        activeBg = inactiveBg;
+        inactiveBg = previousBg;
+        
+        setTimeout(() => {
+          inactiveBg.pause();
+          inactiveBg.currentTime = 1;
+          isSwapping = false;
+        }, 500);
+      }
+      requestAnimationFrame(smoothCrossfadeLoop);
+    }
+    requestAnimationFrame(smoothCrossfadeLoop);
+  }
+
+  render();
+  const timerId = setInterval(render, 1000);
+
+  // ---------- Dust / ember particle field ----------
+  const canvas = document.getElementById('dust');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  function resize(){
+    W = canvas.width = canvas.offsetWidth || window.innerWidth;
+    H = canvas.height = canvas.offsetHeight || window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+
+  function initParticles(){
+    resize();
+    const count = Math.floor((W*H)/16000);
+    particles = [];
+    for(let i=0;i<count;i++){
+      particles.push({
+        x: Math.random()*W,
+        y: Math.random()*H,
+        r: Math.random()*1.6 + 0.3,
+        vy: -(Math.random()*0.25 + 0.05),
+        vx: (Math.random()-0.5)*0.15,
+        a: Math.random()*0.5 + 0.15,
+        flicker: Math.random()*0.02 + 0.005
+      });
+    }
+  }
+
+  function drawParticles(){
+    ctx.clearRect(0,0,W,H);
+    for(const p of particles){
+      p.y += p.vy;
+      p.x += p.vx + Math.sin(p.y*0.01)*0.1;
+      p.a += (Math.random()-0.5)*p.flicker;
+      p.a = Math.max(0.05, Math.min(0.75, p.a));
+      if(p.y < -5){ p.y = H+5; p.x = Math.random()*W; }
+      if(p.x < -5) p.x = W+5;
+      if(p.x > W+5) p.x = -5;
+
+      const grad = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*4);
+      grad.addColorStop(0, `rgba(255,120,90,${p.a})`);
+      grad.addColorStop(1, 'rgba(255,60,40,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r*4,0,Math.PI*2);
+      ctx.fill();
+    }
+    requestAnimationFrame(drawParticles);
+  }
+
+  initParticles();
+  drawParticles();
+})();
+</script>
+
+</body>
+</html>
