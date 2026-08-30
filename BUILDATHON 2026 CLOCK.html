@@ -338,11 +338,11 @@
   }
 
   document.addEventListener('click', ()=>{
-    if(soundOn) playAudio();
-  }, { once: true });
+    if(soundOn && !isPlaying) playAudio();
+  });
   document.addEventListener('touchstart', ()=>{
-    if(soundOn) playAudio();
-  }, { once: true });
+    if(soundOn && !isPlaying) playAudio();
+  }, { passive: true });
 
   const bg1 = document.querySelector('.bg1');
   const bg2 = document.querySelector('.bg2');
